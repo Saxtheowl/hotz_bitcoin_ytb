@@ -3,6 +3,7 @@ import random
 import socket
 import struct
 import time
+from hexdump import hexdump
 
 # import qrcode
 # img = qrcode.make(publ_addr)
@@ -27,8 +28,7 @@ def get_key_with_seed(seed = 1337):
     random.seed(seed)
     priv_list_key = []
     for x in range(32):
-        priv_list_key.append(random.randint(0, 255))
-        
+        priv_list_key.append(random.randint(0, 255))        
     priv_key = bytes(priv_list_key)
     # private key -> WIF
     WIF = b58checksum(b'\x80' + priv_key)
@@ -44,36 +44,63 @@ priv_key, WIF, publ_addr = get_key_with_seed(1337)
 _, _, publ_addr2 = get_key_with_seed(1338)
 _, _, publ_addr3 = get_key_with_seed(6020576873535702996985333164707475418485818481759134379752425601533599923418591834955793927209263343179263601441637535091654337771743703275503669893180678037828190108838657560209946521262509792282192887039426181736226204416607422926108649983)
 
-magic = 0xe8f3e1e3
+BITCOIN_MAGIC = 0xd9b4bef9
+BITCOIN_SEED = 'dnsseed.bluematt.me'
+BCASH_MAGIC = 0xe8f3e1e3
+BCASH_SEED = 'seed.bitcoinabc.org'
+
 
 def makeMessage(magic, command, payload):
-#    checksum = hashlib.sha256(hashlib.sha256(payload).digest()).digest()[0:4]
-    return struct.pack('L12sL4s', magic, command, len(payload), checksum(payload)) + payload
+    return struct.pack('<L12sL4s', magic, command, len(payload), checksum(payload)) + payload
 
 def getVersionMsg():
-    version = 60002
+    version = 31800
     services = 1
     timestamp = int(time.time())
     addr_me = b"\x00" * 26
     addr_you = b"\x00" * 26
     nonce = random.getrandbits(64)
-    sub_version_num = '\x00'
+    sub_version_num = b'\x00'
 
     start_height = 0
 
-    payload = struct.pack('<LQQ26s26sQsL', version, services, timestamp, addr_me,
-        addr_you, nonce, sub_version_num, start_height)
-    return makeMessage(magic, 'version', payload)
+    payload = struct.pack('<LQQ26s26sQsL', version, services, timestamp, addr_me, addr_you, nonce, sub_version_num, start_height)
+    return makeMessage(BITCOIN_MAGIC, b'version', payload)
+
+def sock_read(sock, count):
+    ret = b''
+    while len(ret) < count:
+        ret += sock.recv(count-len(ret))
+    return ret
+
+def recvMessage(sock):
+    magic, command, plen, cksum = struct.unpack('<L12sL4s', sock_read(sock, 24))
+    assert magic == BITCOIN_MAGIC
+    payload = sock_read(sock, plen)
+    assert checksum(payload) == cksum
+    print(command)
+    hexdump(payload)
+    return command, payload
 
 if __name__ == "__main__":
-    peers = socket.gethostbyname_ex('seed.bitcoinabc.org')[2]
+    peers = socket.gethostbyname_ex(BITCOIN_SEED)[2]
     peer = random.choice(peers) # wtf does the return take x time to be random
-    print(peer)
+    print("peer is:{}".format(peer))
+    
+    vermsg = getVersionMsg()
+    hexdump(vermsg)
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((peer, 8333))
+    sock.send(vermsg)
+    cmd, payload = recvMessage(sock)
+    cmd, payload = recvMessage(sock)
+    cmd, payload = recvMessage(sock)
     
     exit(0)
-    
-    print("%s -> %s" % (publ_addr, publ_addr2))
-    print(publ_addr3)
+   
+# print("%s -> %s" % (publ_addr, publ_addr2))
+# print(publ_addr3)
 
 #print("privateKey is: {}".format(shex(priv_key)))
 #print("WIF is: {}".format(WIF))
