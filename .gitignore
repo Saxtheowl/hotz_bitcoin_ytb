@@ -1,3 +1,5 @@
 bitcoin-abc
 bitcoin
 *.swp
+secret
+*~
