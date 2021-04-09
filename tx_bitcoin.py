@@ -42,7 +42,7 @@ def get_key_with_seed(seed = 1337):
 
 priv_key, WIF, publ_addr = get_key_with_seed(1337)
 _, _, publ_addr2 = get_key_with_seed(1338)
-_, _, publ_addr3 = get_key_with_seed(6020576873535702996985333164707475418485818481759134379752425601533599923418591834955793927209263343179263601441637535091654337771743703275503669893180678037828190108838657560209946521262509792282192887039426181736226204416607422926108649983)
+_, _, publ_addr3 = get_key_with_seed(1)
 
 BITCOIN_MAGIC = 0xd9b4bef9
 BITCOIN_SEED = 'dnsseed.bluematt.me'
@@ -54,7 +54,7 @@ def makeMessage(magic, command, payload):
     return struct.pack('<L12sL4s', magic, command, len(payload), checksum(payload)) + payload
 
 def getVersionMsg():
-    version = 31800
+    version = 60002
     services = 1
     timestamp = int(time.time())
     addr_me = b"\x00" * 26
