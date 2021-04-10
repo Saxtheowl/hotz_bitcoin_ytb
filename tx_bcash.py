@@ -5,7 +5,7 @@ import struct
 import time
 from hexdump import hexdump
 
-#import qrcode
+#aimport qrcode
 # img = qrcode.make(publ_addr)
 # img.save("coin.png")
 
