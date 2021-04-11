@@ -1,0 +1,11 @@
+       vSeeds.emplace_back("seed.bitcoinabc.org");
+        // BU backed seeder                                                                             
+        vSeeds.emplace_back("btccash-seeder.bitcoinunlimited.info");
+	// Jason B. Cox                                                                                 
+        vSeeds.emplace_back("seeder.jasonbcox.com");
+	// Amaury SÉCHET                                                                                
+        vSeeds.emplace_back("seed.deadalnix.me");
+	// BCHD                                                                                         
+	vSeeds.emplace_back("seed.bchd.cash");
+        // Fabien                                                                                       
+        vSeeds.emplace_back("seeder.fabien.cash");
