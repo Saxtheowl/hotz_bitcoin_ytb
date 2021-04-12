@@ -42,7 +42,12 @@ def ripemd160(x):
 def read_integer(filename):
     with open(filename) as f:
         return int(f.read())
-
+    
+#def read_integer_test(filename):
+#    return open(filename, "rb").read()
+    
+#PRIV_KEY = open("secret", "rb").read()
+    
 def get_key_with_seed(seed = 1337):
 #generate_private key
     random.seed(seed)
@@ -63,7 +68,7 @@ def get_key_with_seed(seed = 1337):
 priv_key, WIF, hash1601, publ_addr = get_key_with_seed()
 _, _, _, publ_addr2 = get_key_with_seed(1338)
 
-dat_secret_seed = read_integer('secret')
+dat_secret_seed = read_integer_test('secret')
 
 _, WIF3, hash1603, publ_addr3 = get_key_with_seed(dat_secret_seed)
 _, WIF4, hash1604, publ_addr4 = get_key_with_seed(dat_secret_seed + 1337)
