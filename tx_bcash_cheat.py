@@ -88,6 +88,7 @@ def varstr(x):
   return bytes([len(x)]) + x
 
 PRIV_KEY = open("secret", "rb").read()
+PRIV_KEY2 = open("secret2", "rb").read()
 
 #PRIV_KEY = b'13371337133713371337133713371337'
 #_, _, _, _, addr = priv_key_to_public(PRIV_KEY)
@@ -140,15 +141,23 @@ def recvMessage(sock):
     hexdump(payload)
   return command, payload
 
+def modify_priv_key(priv_key):
+  plaintext = binascii.unhexlify(priv_key)
+  plaintext_length = 32#len(plaintext)
+  print(plaintext_length)
+  plaintext_number = int.from_bytes(plaintext, 'big')
+  return(plaintext_number.to_bytes(plaintext_length, 'big'))
+
 if __name__ == "__main__":
   priv_key, WIF, publ_key, h1601, publ_addr = priv_key_to_public(PRIV_KEY)
-#  priv_key2, _, publ_key2, h1602, publ_addr2 = priv_key_to_public(PRIV_KEY + bytes(1337))
+  priv_key2, _, publ_key2, h1602, publ_addr2 = priv_key_to_public(PRIV_KEY2)
   print(shex(publ_key))
+  print(shex(publ_key2))
+  #exit(0)
   assert uncompress_publ_key(compress_publ_key(publ_key)) == publ_key
   make_qrcode(publ_addr)
-exit(0)
   # public address
-  publ_addr2 = "1Lg2KRDk6CWfy1K6vi7rVqtBYMYdBZvXu4"
+#  publ_addr2 = "1Lg2KRDk6CWfy1K6vi7rVqtBYMYdBZvXu4"
   tmp = base58.b58decode(publ_addr2)
   assert checksum(tmp[0:-4]) == tmp[-4:]
   h1602 = tmp[1:-4]
@@ -160,7 +169,7 @@ exit(0)
   print("WE WILL SEND: %s -> %s" % (publ_addr, publ_addr2))
   print(shex(h1601))
   print(shex(scriptPubkey_sent))
-
+  #exit(0)
   peers = socket.gethostbyname_ex('seed.bitcoinabc.org')[2]
   random.seed(time.time())
   random.shuffle(peers)
@@ -183,7 +192,8 @@ exit(0)
   # REPLACE WITH YOUR TX BLOCK
   #TX_BLOCK = "00000000000000000007a70ff954a0892d9367612993a8220af6c27ac3dbccfc"
   #TX_BLOCK = "0000000000000000015d3fc2aa182f86ce090d0acc3d53f2d6b7f617d17199b9"
-  TX_BLOCK = "00000000000000000079cd3a4fbf12026113762c233bf19c5cfa711c28078e76"
+  #TX_BLOCK = "00000000000000000079cd3a4fbf12026113762c233bf19c5cfa711c28078e76"
+  TX_BLOCK = "0000000000000000018513564964622a7c4ac307e24e41517c0ea54b85a40e6b"
 
   # request data about block tx is in
   msg = makeMessage(b'getdata', struct.pack('<BL32s', 1, 2, binascii.unhexlify(TX_BLOCK)[::-1]))
@@ -321,9 +331,9 @@ exit(0)
     return raw_tx
 
   # anyone can spend?
-  scriptPubkey = b"\x6a\x4c" + varstr(b" GEORGE HOTZ SENT THIS LIVE ON TWITCH. twitch.tv/tomcr00s3  BITCOIN SCRIPT CHECK = STUPID, ETHEREUM SCRIPT = GOOD ")
+  scriptPubkey = b"\x6a\x4c" + varstr(b"woot")
 
-  FEE = 800
+  FEE = 315
   raw_tx = fake_raw_tx(outpoint, output_script, output_value, output_value-FEE, scriptPubkey)
 
   s256 = dbl256(raw_tx)
